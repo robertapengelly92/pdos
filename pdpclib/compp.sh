@@ -9,4 +9,4 @@ if [ -f pdptest.exe ]; then rm -rf pdptest.exe; fi
 for f in *.o; do rm -rf *.o; done
 for f in *.obj; do rm -rf *.obj; done
 
-wmake -u -f makefile.wcl
+make -f makefile.lnx

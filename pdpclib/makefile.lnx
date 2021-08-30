@@ -1,32 +1,17 @@
-CC=wcl
-COPTS=-q -w -c -I. -ml -zl -D__MSDOS__ -fpi87 -s -zdp -zu
+CC=gcc
+COPTS=-c -O2 -fno-builtin -DUSE_MEMMGR -I. -fno-stack-protector
 
-pdptest.exe: watcom.lib
-	echo wlink File pdptest.obj Name $@ Form dos Library $< Option quiet
+pdptest: pdplinux.a
+	ld -m elf_i386 -o $@ linstart.o linsupa.o pdptest.o pdplinux.a
 
-watcom.lib: dosstart.obj pdptest.obj stdio.obj string.obj stdlib.obj start.obj time.obj errno.obj assert.obj signal.obj locale.obj ctype.obj setjmp.obj math.obj dossupc.obj dossupa.obj
+pdplinux.a: linstart.o linsupa.o pdptest.o stdio.o string.o stdlib.o start.o time.o errno.o assert.o signal.o locale.o ctype.o setjmp.o math.o __memmgr.o
 	if [ -f $@ ]; then rm -rf $@; fi
-	wlib -b -q $(basename $@) +dosstart.obj
-	wlib -b -q $(basename $@) +stdio.obj
-	wlib -b -q $(basename $@) +string.obj
-	wlib -b -q $(basename $@) +stdlib.obj
-	wlib -b -q $(basename $@) +start.obj
-	wlib -b -q $(basename $@) +time.obj
-	wlib -b -q $(basename $@) +errno.obj
-	wlib -b -q $(basename $@) +assert.obj
-	wlib -b -q $(basename $@) +signal.obj
-	wlib -b -q $(basename $@) +locale.obj
-	wlib -b -q $(basename $@) +ctype.obj
-	wlib -b -q $(basename $@) +setjmp.obj
-	wlib -b -q $(basename $@) +math.obj
-	wlib -b -q $(basename $@) +dossupc.obj
-	wlib -b -q $(basename $@) +dossupa.obj
+	ar r $@ linstart.o linsupa.o stdio.o string.o stdlib.o
+	ar r $@ start.o time.o errno.o assert.o signal.o
+	ar r $@ locale.o ctype.o setjmp.o math.o __memmgr.o
 
-dosstart.obj: dosstart.asm
-	wasm -q -DWATCOM -fo=.obj $<
+.c.o:
+	$(CC) $(COPTS) -m32 $<
 
-dossupa.obj: dossupa.asm
-	wasm -q -DWATCOM -fo=.obj $<
-
-%.obj: %.c
-	$(CC) $(COPTS) -fo=.obj $<
+linsupa.o: linsupa.S
+	$(CC) $(COPTS) -m32 -o $@ $<
