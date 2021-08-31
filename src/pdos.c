@@ -850,7 +850,19 @@ void pdosRun(void)
     memory, we do the reverse, ie substract 0x10000 and
     then divide by 16.  Oh, and because we took away so
     much memory, we only end up supplying 0x5000U. */
-    memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000), 0x5000U);
+    {
+        unsigned long mem = (BosGetMemorySize() / 16) - (PDOS16_MEMSTART + 0x1000);
+        
+        if (mem <= 0) {
+        
+            printf ("ERROR: Not enough free memory available\n");
+            for (;;) {}
+        
+        }
+        
+        memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000),
+            (BosGetMemorySize() / 16) - (PDOS16_MEMSTART + 0x1000));
+    }
 #endif
 #ifndef USING_EXE
     loadPcomm();
@@ -2778,7 +2790,14 @@ static void loadExe(char *prog, POSEXEC_PARMBLOCK *parmblock)
         isexe = 1;
         headerLen = *(unsigned int *)&firstbit[8];
         headerLen *= 16;
-        header = memmgrAllocate(&memmgr, headerLen, 0);
+        
+        if (!(header = memmgrAllocate(&memmgr, headerLen, 0))) {
+        
+            printf ("ERROR: Not enough free memory available\n");
+            for (;;) {}
+        
+        }
+        
         memcpy(header, firstbit, sizeof firstbit);
         fileRead(fno, header + sizeof firstbit, headerLen - sizeof firstbit,
                  &readbytes);
@@ -4649,7 +4668,12 @@ static char * envAllocateEmpty(char *progName)
 #ifdef __32BIT__
     envptr = kmalloc(envSize);
 #else
-    envptr = memmgrAllocate(&memmgr, envSize, 0);
+    if (!(envptr = memmgrAllocate(&memmgr, envSize, 0))) {
+    
+        printf ("ERROR: Not enough free memory available\n");
+        for (;;) {}
+    
+    }
     envptr = (unsigned char *)FP_NORM(envptr);
 #endif
     /* Empty environment is two NUL bytes */
@@ -4670,7 +4694,12 @@ static char * envCopy(char *previous, char *progName)
 #ifdef __32BIT__
     envptr = kmalloc(envSize);
 #else
-    envptr = memmgrAllocate(&memmgr, envSize, 0);
+    if (!(envptr = memmgrAllocate(&memmgr, envSize, 0))) {
+    
+        printf ("ERROR: Not enough free memory available\n");
+        for (;;) {}
+    
+    }
     envptr = FP_NORM(envptr);
 #endif
     memcpy(envptr, previous, envSize);
