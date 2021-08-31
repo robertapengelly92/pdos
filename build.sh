@@ -42,4 +42,4 @@ if [ -f src/os.lib ]; then rm -rf src/os.lib; fi
 if [ -f src/pbootsec.com ]; then rm -rf src/pbootsec.com; fi
 if [ -f src/watcom.lib ]; then rm -rf src/watcom.lib; fi
 
-qemu-system-i386 -drive file=pdos16.img,format=raw,if=floppy,index=0
+#qemu-system-i386 -drive file=pdos16.img,format=raw,if=floppy,index=0

@@ -492,6 +492,15 @@ int BosVBEPaletteOps(unsigned int operation,
     return (regsout.h.ah);
 }
 
+unsigned BosGetLowMemory() {
+
+    union REGS regsin;
+    union REGS regsout;
+    int86(0x12 + BIOS_INT_OFFSET, &regsin, &regsout);
+    return (regsout.x.ax << 6);
+
+}
+
 int BosDiskReset(unsigned int drive)
 {
     union REGS regsin;
