@@ -3,7 +3,7 @@
 #
 
 CC=gcc
-COPTS=-c -O2 -fno-builtin -DUSE_MEMMGR -I . -m32 -fno-stack-protector -fno-leading-underscore
+COPTS=-c -O2 -fno-builtin -DUSE_MEMMGR -I . -m32 -fno-stack-protector
 
 pdptest: linstart.o linsupa.o pdptest.o stdio.o string.o stdlib.o \
        start.o time.o errno.o assert.o signal.o locale.o \
