@@ -13,5 +13,5 @@ pdplinux.a: linstart.o linsupa.o pdptest.o stdio.o string.o stdlib.o start.o tim
 .c.o:
 	$(CC) $(COPTS) -m32 $<
 
-linsupa.o: linsupa.S
-	$(CC) $(COPTS) -m32 -o $@ $<
+linsupa.o: linsupa.asm
+	as --32 -o $@ $<
