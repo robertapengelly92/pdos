@@ -94,6 +94,8 @@ int BosVBEPaletteOps(unsigned int operation, /* 10:4F09 */
                      unsigned int start_index,
                      void *buffer);
 
+unsigned BosGetLowMemory(); /* 12 */
+
 int BosDiskReset(unsigned int drive); /* 13:0 */
 
 int BosDiskStatus(unsigned int drive, unsigned int *status); /* 13:1 */
