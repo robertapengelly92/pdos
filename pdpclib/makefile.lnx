@@ -8,7 +8,7 @@ COPTS=-c -O2 -fno-builtin -DUSE_MEMMGR -I . -m32 -fno-stack-protector
 pdptest: linstart.o linsupa.o pdptest.o stdio.o string.o stdlib.o \
        start.o time.o errno.o assert.o signal.o locale.o \
        ctype.o setjmp.o math.o __memmgr.o
-	rm -f pdplinux.a
+	if [-f pdplinux.a ]; then rm -f pdplinux.a; fi
 	ar r pdplinux.a linstart.o linsupa.o stdio.o string.o stdlib.o
 	ar r pdplinux.a start.o time.o errno.o assert.o signal.o
 	ar r pdplinux.a locale.o ctype.o setjmp.o math.o __memmgr.o
