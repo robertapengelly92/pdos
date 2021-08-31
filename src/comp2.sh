@@ -13,7 +13,8 @@ wasm -zq -zcm -fo=.obj -Dmemodel=large handlers.asm
 wasm -zq -zcm -fo=.obj -Dmemodel=large lldos.asm
 wasm -zq -zcm -fo=.obj -Dmemodel=large support.asm
 
-wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib memmgr.c format.c patmat.c process.c
+wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib memmgr.c
+wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib format.c patmat.c process.c
 wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib int21.c log.c helper.c
 wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib bos.c fat.c ../pdpclib/string.c ../pdpclib/ctype.c ../pdpclib/dossupc.c
 wcl -ecc -q -w -c -ml -zl -fpi87 -s -zdp -zu -fo=.obj -D__MSDOS__ -I../pdpclib pdos.c
