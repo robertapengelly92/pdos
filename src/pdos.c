@@ -850,7 +850,7 @@ void pdosRun(void)
     memory, we do the reverse, ie substract 0x10000 and
     then divide by 16.  Oh, and because we took away so
     much memory, we only end up supplying 0x5000U. */
-    memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000), BosGetLowMemory() - 0x4000U);
+    memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000), 0x5000U);
 #endif
 #ifndef USING_EXE
     loadPcomm();

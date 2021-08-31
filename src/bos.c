@@ -492,13 +492,26 @@ int BosVBEPaletteOps(unsigned int operation,
     return (regsout.h.ah);
 }
 
-unsigned BosGetLowMemory() {
 
+/* INT 12H - get size of memory starting at 00000000H */
+/* Note that the interrupt traditionally returns the number of
+   KB in AX, but this could theoretically be changed to return
+   an extension, perhaps if AX = FFFFH then the amount of
+   memory will be returned in BX:CX as a simple 32-bit number
+   of bytes. */
+
+unsigned long BosGetMemorySize(void)
+{
     union REGS regsin;
     union REGS regsout;
-    int86(0x12 + BIOS_INT_OFFSET, &regsin, &regsout);
-    return (regsout.x.ax << 6);
 
+    int86(0x12 + BIOS_INT_OFFSET, &regsin, &regsout);
+    if (regsout.x.ax == 0xffffU)
+    {
+        return (((unsigned long)regsout.x.bx << 16)
+                | regsout.x.cx);
+    }
+    return ((unsigned long)regsout.x.ax << 10);
 }
 
 int BosDiskReset(unsigned int drive)
