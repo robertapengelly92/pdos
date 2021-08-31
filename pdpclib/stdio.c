@@ -108,6 +108,11 @@ extern int CTYP __seek(int handle, long offset, int whence);
 extern void CTYP __close(int handle);
 extern void CTYP __remove(const char *filename);
 extern void CTYP __rename(const char *old, const char *newnam);
+#elif defined (__gnu_linux__)
+extern int __seek(int handle, long offset, int whence);
+extern void __close(int handle);
+extern void __remove(const char *filename);
+extern void __rename(const char *old, const char *newnam);
 #endif
 
 #ifdef __AMIGA__
