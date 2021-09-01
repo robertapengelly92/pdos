@@ -185,7 +185,6 @@ static MEMMGR btlmem;
 #define memmgrSetOwner(m,p,o) pdos16MemmgrSetOwner(m,p,o)
 static void pdos16MemmgrFree(MEMMGR *memmgr, void *ptr);
 static void *pdos16MemmgrAllocate(MEMMGR *memmgr, size_t bytes, int id);
-static void *pdos16MemmgrAllocPages(MEMMGR *memmgr, size_t pages, int id);
 static void pdos16MemmgrFreePages(MEMMGR *memmgr, size_t page);
 static int pdos16MemmgrReallocPages(MEMMGR *memmgr,
                                     void *ptr,
@@ -1793,7 +1792,7 @@ void *PosAllocMemPages(unsigned int pages, unsigned int *maxpages)
 {
     void *p;
 
-    p = pdos16MemmgrAllocPages(&memmgr, pages, memId);
+    p = pdos16MemmgrAllocate(&memmgr, pages * 16, memId);
     if (p == NULL && maxpages != NULL)
     {
         *maxpages = memmgrMaxSize(&memmgr);
@@ -3931,35 +3930,6 @@ static void *pdos16MemmgrAllocate(MEMMGR *memmgr, size_t bytes, int id)
     unsigned long abs;
 
     ptr = (memmgrAllocate)(memmgr, ALIGN(bytes, 16), id);
-    if (ptr == NULL)
-    {
-        return (ptr);
-    }
-    abs = ADDR2ABS(ptr);
-
-    /* and because we wasted 0x10000 for control blocks, we
-    skip that, and the bit above 3000 we multiply by 16. */
-    abs -= (unsigned long)PDOS16_MEMSTART * 16;
-    abs *= 16;
-    abs += (unsigned long)PDOS16_MEMSTART * 16;
-    abs += 0x10000UL;
-    ptr = ABS2ADDR(abs);
-    ptr = FP_NORM(ptr);
-    return (ptr);
-}
-
-static void *pdos16MemmgrAllocPages(MEMMGR *memmgr, size_t pages, int id)
-{
-    void *ptr;
-    unsigned long abs;
-
-    /* I don't know why some apps request 0 pages, but we'd better
-    give them a decent pointer. */
-    if (pages == 0)
-    {
-        pages = 1;
-    }
-    ptr = (memmgrAllocate)(memmgr, pages, id);
     if (ptr == NULL)
     {
         return (ptr);
