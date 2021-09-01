@@ -1,1 +1,0 @@
-gcc -o bootupd bootupd.c

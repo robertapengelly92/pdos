@@ -355,10 +355,10 @@ static void int21handler(union REGS *regsin,
                             &regsout->d.edx);
 #else
             PosGetFreeSpace(regsin->h.dl,
-                            (unsigned int *) &regsout->x.ax,
-                            (unsigned int *) &regsout->x.bx,
-                            (unsigned int *) &regsout->x.cx,
-                            (unsigned int *) &regsout->x.dx);
+                            (unsigned int) &regsout->x.ax,
+                            (unsigned int) &regsout->x.bx,
+                            (unsigned int) &regsout->x.cx,
+                            (unsigned int) &regsout->x.dx);
 #endif
             break;
 
@@ -612,7 +612,7 @@ static void int21handler(union REGS *regsin,
                                                         &regsout->d.edx);
 #else
                 regsout->x.ax = PosGetDeviceInformation(regsin->x.bx,
-                                                        (unsigned int *) &regsout->x.dx);
+                                                        (unsigned int) &regsout->x.dx);
 #endif
                 if (regsout->x.ax != 0)
                 {
@@ -746,7 +746,7 @@ static void int21handler(union REGS *regsin,
                 regsin->x.bx = 0x400;
             }
 #endif
-            p = PosAllocMemPages(regsin->x.bx, (unsigned int *) &regsout->x.bx);
+            p = PosAllocMemPages(regsin->x.bx, (unsigned int) &regsout->x.bx);
             if (p == NULL)
             {
                 regsout->x.cflag = 1;
@@ -781,7 +781,7 @@ static void int21handler(union REGS *regsin,
 #else
             regsout->x.ax = PosReallocPages(MK_FP(sregs->es, 0),
                                             regsin->x.bx,
-                                            (unsigned int *) &regsout->x.bx);
+                                            (unsigned int) &regsout->x.bx);
             /* regsout->x.ax = 0; */
 #endif
             if (0) /* regsout->x.ax != 0) */ /* always return success */
@@ -901,8 +901,8 @@ static void int21handler(union REGS *regsin,
                                                               &regsout->d.ecx);
 #else
                 regsout->x.ax=PosGetFileLastWrittenDateAndTime(regsin->x.bx,
-                                                              (unsigned int *) &regsout->x.dx,
-                                                              (unsigned int *) &regsout->x.cx);
+                                                              (unsigned int) &regsout->x.dx,
+                                                              (unsigned int) &regsout->x.cx);
 #endif
 
 #ifdef __32BIT__

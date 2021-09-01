@@ -9,7 +9,7 @@
 
 .386p
 
-.model flat, c
+.model flat
 
 ;.stack 4000h
 

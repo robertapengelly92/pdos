@@ -261,23 +261,21 @@ CalculateLocation endp
 ;  DX = Remainder (Leftover, Modulus)
 Lba2Chs proc
  div  word ptr [SectorsPerTrack]
-        ; ax = LBA / SPT
-        ; dx = LBA % SPT        = sector - 1
- mov  cx,  dx
- inc  cx
-        ; cx = sector no.
+; AX = DX:AX / SectorsPerTrack (Temp)
+; DX = DX:AX % SectorsPerTrack (Sector)
+ mov  cl,  dl     ;Sector #
+ inc  cl ;Add one since sector starts at 1, not zero
  xor  dx, dx       ;Zero out dx, so now we are just working on AX
  div  word ptr [Heads]
-        ; ax = (LBA / SPT) / HPC = cylinder
-        ; dx = (LBA / SPT) % HPC = head
- mov ch,  al
-        ; ch = LSB 0...7 of cylinder no.
- ror ah,  1
- ror ah,  1
- or  cl,  ah
-        ; cl = MSB 8...9 of cylinder no. + sector no.
- mov dh,  dl
-        ; dh = head no.
+; AX = AX / Heads ( = Cylinder)
+; DX = AX % Heads ( = Head)
+ mov  dh,  dl     ;Mov dl into dh (dh=head)
+;Have to store cx because 8086 needs it to be able to shl!
+ push cx
+ mov  cl, 6
+ shl  ax,  cl ;Move cylinder 6-bits up to make room for Sector
+ pop  cx
+ or  cx,  ax
  ret
 Lba2Chs endp
 
@@ -310,27 +308,20 @@ ReadSingleSector proc
  push bx
  push cx
  push dx
- push di
  push es
- mov  di,  5
  call Lba2Chs     ;Grab our CHS
  RetryRead:
   call ResetDrive   ;Get drive ready..
   mov  dl, [BootDisk]  ;Grab our boot disk
   mov  ax, 0201h   ;Read function, one sector
   int  13h
-  jnc  ReadSuccess
-  dec  di
-  jnz  RetryRead
-  int  0x18
- ReadSuccess:
-  pop es
-  pop di
-  pop dx
-  pop cx
-  pop bx
-  pop ax
-  ret
+  jc   RetryRead
+ pop es
+ pop dx
+ pop cx
+ pop bx
+ pop ax
+ ret
 ReadSingleSector endp
 
 ;Read multiple sectors
