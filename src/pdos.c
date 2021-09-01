@@ -850,7 +850,7 @@ void pdosRun(void)
     memory, we do the reverse, ie substract 0x10000 and
     then divide by 16.  Oh, and because we took away so
     much memory, we only end up supplying 0x5000U. */
-    memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000), 0x5000U);
+    memmgrSupply(&memmgr, (char *)MK_FP(PDOS16_MEMSTART,0x0000), (BosGetMemorySize() / 16) - (PDOS16_MEMSTART + 0x1000));
 #endif
 #ifndef USING_EXE
     loadPcomm();
@@ -2778,7 +2778,14 @@ static void loadExe(char *prog, POSEXEC_PARMBLOCK *parmblock)
         isexe = 1;
         headerLen = *(unsigned int *)&firstbit[8];
         headerLen *= 16;
-        header = memmgrAllocate(&memmgr, headerLen, 0);
+        
+        if ((header = memmgrAllocate(&memmgr, headerLen, 0)) == NULL) {
+        
+            printf ("Not enough free memeory available\n");
+            for (;;) {}
+        
+        }
+        
         memcpy(header, firstbit, sizeof firstbit);
         fileRead(fno, header + sizeof firstbit, headerLen - sizeof firstbit,
                  &readbytes);
@@ -2825,7 +2832,7 @@ static void loadExe(char *prog, POSEXEC_PARMBLOCK *parmblock)
         memmgrFree(&memmgr, envptr);
         return;
     }
-    pcb = pdos16MemmgrAllocPages(&memmgr, (exeLen + extraLen) / 16, 0);
+    pcb = pdos16MemmgrAllocate(&memmgr, (exeLen + extraLen), 0);
     if (pcb != NULL)
     {
         psp = pcb + PDOS_PROCESS_SIZE;
@@ -3897,14 +3904,7 @@ int pdosstrt(void)
 #endif
 
 #ifndef __32BIT__
-static void *pdos16MemmgrAllocate(MEMMGR *memmgr, size_t bytes, int id)
-{
-    size_t pages;
-
-    /* we need to round up bytes to nearest page */
-    pages = bytes / 16 + ((bytes & 0x0f) != 0 ? 1 : 0);
-    return (pdos16MemmgrAllocPages(memmgr, pages, id));
-}
+#define     ALIGN(x,y)                  (((x) + (y) - 1) & ~((y) - 1))
 
 static void pdos16MemmgrFree(MEMMGR *memmgr, void *ptr)
 {
@@ -3923,6 +3923,29 @@ static void pdos16MemmgrFree(MEMMGR *memmgr, void *ptr)
     ptr = ABS2ADDR(abs);
     (memmgrFree)(memmgr, ptr);
     return;
+}
+
+static void *pdos16MemmgrAllocate(MEMMGR *memmgr, size_t bytes, int id)
+{
+    void *ptr;
+    unsigned long abs;
+
+    ptr = (memmgrAllocate)(memmgr, ALIGN(bytes, 16), id);
+    if (ptr == NULL)
+    {
+        return (ptr);
+    }
+    abs = ADDR2ABS(ptr);
+
+    /* and because we wasted 0x10000 for control blocks, we
+    skip that, and the bit above 3000 we multiply by 16. */
+    abs -= (unsigned long)PDOS16_MEMSTART * 16;
+    abs *= 16;
+    abs += (unsigned long)PDOS16_MEMSTART * 16;
+    abs += 0x10000UL;
+    ptr = ABS2ADDR(abs);
+    ptr = FP_NORM(ptr);
+    return (ptr);
 }
 
 static void *pdos16MemmgrAllocPages(MEMMGR *memmgr, size_t pages, int id)
@@ -4649,7 +4672,13 @@ static char * envAllocateEmpty(char *progName)
 #ifdef __32BIT__
     envptr = kmalloc(envSize);
 #else
-    envptr = memmgrAllocate(&memmgr, envSize, 0);
+    if ((envptr = memmgrAllocate(&memmgr, envSize, 0)) == NULL) {
+    
+        printf ("Not enough free memeory available\n");
+        for (;;) {}
+    
+    }
+    
     envptr = (unsigned char *)FP_NORM(envptr);
 #endif
     /* Empty environment is two NUL bytes */
@@ -4670,7 +4699,13 @@ static char * envCopy(char *previous, char *progName)
 #ifdef __32BIT__
     envptr = kmalloc(envSize);
 #else
-    envptr = memmgrAllocate(&memmgr, envSize, 0);
+    if ((envptr = memmgrAllocate(&memmgr, envSize, 0)) == NULL) {
+    
+        printf ("Not enough free memeory available\n");
+        for (;;) {}
+    
+    }
+    
     envptr = FP_NORM(envptr);
 #endif
     memcpy(envptr, previous, envSize);
